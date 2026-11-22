@@ -1,0 +1,2 @@
+/* pdoc picks this file up via --template-directory. Keep the logo small. */
+nav.pdoc .logo { max-height: 3rem; width: auto; margin: 1rem 0 .5rem !important; display: block; }

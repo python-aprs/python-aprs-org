@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="hero">
+  <h1>APRS for Python</h1>
+  <p class="lede">python-aprs is a set of small, pure-Python libraries for building
+  <a href="https://www.aprs.org/">APRS</a>-enabled applications: decode and encode
+  packets, talk to a TNC over KISS, connect to APRS-IS, and run a station that sends
+  and acknowledges messages. Everything is asyncio-first, with blocking wrappers
+  where they are more convenient.</p>
+  <pre><code>pip install aprs3</code></pre>
+</section>
+
+<section>
+  <h2>The libraries</h2>
+  <p>Each layer builds on the one before it. Install only the layer you need; it pulls in the rest.</p>
+  <ol class="libs">
+  {% for lib in libraries %}
+    <li class="lib">
+      <div class="lib-head">
+        <h3><a href="{{ lib.repo_url }}">{{ lib.repo }}</a></h3>
+        {% if lib.latest %}
+        <a class="badge" href="{{ lib.latest.html_url }}">{{ lib.latest.tag_name }}</a>
+        {% else %}
+        <span class="badge muted">unreleased</span>
+        {% endif %}
+      </div>
+      <p>{{ lib.summary }}</p>
+      <p class="links">
+        <code>import {{ lib.module }}</code>
+        <a href="{{ lib.docs_url }}">API docs</a>
+        <a href="{{ lib.repo_url }}">Source</a>
+        {% if lib.on_pypi %}<a href="{{ lib.pypi_url }}">PyPI</a>{% endif %}
+        <a href="/changelog.html#{{ lib.repo }}">Changelog</a>
+      </p>
+    </li>
+  {% endfor %}
+  </ol>
+</section>
+
+<section>
+  <h2>A taste</h2>
+<pre><code>import asyncio
+from aprs import create_aprsis_connection
+
+async def main():
+    transport, protocol = await create_aprsis_connection(
+        host="noam.aprs2.net",
+        port=14580,
+        user="N0CALL",
+        passcode="-1",  # receive only; use your passcode to transmit
+        command="filter r/46.1/-122.9/50",
+    )
+    async for frame in protocol.read():
+        print(frame.source, frame.info)
+
+asyncio.run(main())</code></pre>
+  <p>The same frames can come from a radio instead: swap in
+  <code>aprs.create_serial_connection("/dev/ttyUSB0", 9600)</code> for a serial KISS TNC or
+  <code>aprs.create_tcp_connection("localhost", 8001)</code> for KISS over TCP
+  (Direwolf, for example).</p>
+</section>
+
+{% if recent %}
+<section>
+  <h2>Recent releases</h2>
+  <ul class="recent">
+  {% for lib, r in recent %}
+    <li><time datetime="{{ r.date }}">{{ r.date }}</time>
+      <a href="/changelog.html#{{ lib.repo }}-{{ r.tag_name }}">{{ lib.repo }} {{ r.tag_name }}</a>
+      {% if r.prerelease %}<span class="badge muted">pre-release</span>{% endif %}</li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}
